@@ -36,4 +36,14 @@ Rails.application.config.after_initialize do
     end
   end
 
+  ArchivesSpaceClient.class_eval do
+    # Override get_all_series to filter out series that are not the direct
+    # descendent of a Resource record
+    alias_method :get_all_series_pre_yale, :get_all_series
+    def get_all_series(resource_uri)
+      all_series = get_all_series_pre_yale(resource_uri)
+      all_series.delete_if {|record| record.json['parent']}
+      all_series
+    end
+  end
 end
